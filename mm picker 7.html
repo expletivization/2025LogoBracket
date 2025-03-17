@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>2025 Men's NCAA Bracket Picker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    /* Bracket container */
+    .bracket-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+    .region {
+      border: 1px solid #ccc;
+      margin: 10px;
+      padding: 10px;
+      width: 22%;
+      min-width: 250px;
+    }
+    /* Each round has extra bottom padding and border for separation */
+    .round {
+      margin: 10px 0;
+      padding: 10px;
+      border-bottom: 2px solid #ccc;
+    }
+    .round:last-child {
+      border-bottom: none;
+    }
+    .match {
+      margin: 5px 0;
+      text-align: center;
+    }
+    .team, .team-slot img {
+      cursor: pointer;
+      border: 2px solid transparent;
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      margin: 2px;
+    }
+    .team:hover, .team-slot img:hover {
+      border: 2px solid blue;
+    }
+    .team-slot {
+      display: inline-block;
+      min-width: 60px;
+      min-height: 60px;
+      vertical-align: middle;
+    }
+    /* Final Four and Championship styling */
+    .finals {
+      border: 2px solid #000;
+      padding: 10px;
+      width: 80%;
+      margin: 30px auto;
+      text-align: center;
+    }
+    .finals .match {
+      display: flex;
+      justify-content: space-around;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>2025 Men's NCAA Bracket Picker</h1>
+
+  <!-- Bracket Regions -->
+  <div class="bracket-container">
+    <div class="region" id="South">
+      <h2>South Region</h2>
+      <div class="round" id="South-r1"></div>
+      <div class="round" id="South-r2"></div>
+      <div class="round" id="South-r3"></div>
+      <div class="round" id="South-r4"></div>
+    </div>
+    <div class="region" id="West">
+      <h2>West Region</h2>
+      <div class="round" id="West-r1"></div>
+      <div class="round" id="West-r2"></div>
+      <div class="round" id="West-r3"></div>
+      <div class="round" id="West-r4"></div>
+    </div>
+    <div class="region" id="East">
+      <h2>East Region</h2>
+      <div class="round" id="East-r1"></div>
+      <div class="round" id="East-r2"></div>
+      <div class="round" id="East-r3"></div>
+      <div class="round" id="East-r4"></div>
+    </div>
+    <div class="region" id="Midwest">
+      <h2>Midwest Region</h2>
+      <div class="round" id="Midwest-r1"></div>
+      <div class="round" id="Midwest-r2"></div>
+      <div class="round" id="Midwest-r3"></div>
+      <div class="round" id="Midwest-r4"></div>
+    </div>
+  </div>
+
+  <!-- Final Four and Championship -->
+  <div class="finals" id="finals">
+    <h2>Final Four</h2>
+    <div class="match" id="finalSemis">
+      <!-- Semifinal 1: South vs West -->
+      <div id="semi1"></div>
+      <!-- Semifinal 2: East vs Midwest -->
+      <div id="semi2"></div>
+    </div>
+    <h2>Championship</h2>
+    <div class="match" id="championship">
+      <div id="champ1"></div>
+      <div id="champ2"></div>
+    </div>
+    <h2>Champion:</h2>
+    <div id="winner"></div>
+  </div>
+
+  <script>
+    // Helper function to escape apostrophes in team names.
+    function escapeTeamName(team) {
+      return team.replace(/'/g, "\\'");
+    }
+
+    // Define regions with full 16-team arrays in seeding order.
+    // Seeds: [1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15]
+    var regions = {
+      "South": [
+        "Auburn",         // 1
+        "ALST-FSU",       // 16 (now with dash)
+        "Louisville",     // 8
+        "Creighton",      // 9
+        "Michigan",       // 5
+        "UC San Diego",   // 12
+        "Texas A&M",      // 4
+        "Yale",           // 13
+        "Ole Miss",       // 6
+        "SDSU-UNC",       // 11 (now with dash)
+        "Iowa St.",       // 3
+        "Lipscomb",       // 14
+        "Marquette",      // 7
+        "New Mexico",     // 10
+        "Mich. St.",      // 2
+        "Bryant"          // 15
+      ],
+      "West": [
+        "Florida",       // 1
+        "Norfolk St.",   // 16
+        "UConn",         // 8
+        "Oklahoma",      // 9
+        "Memphis",       // 5
+        "Colo. St.",     // 12
+        "Maryland",      // 4
+        "Grand Canyon",  // 13
+        "Missouri",      // 6
+        "Drake",         // 11 (Missouri plays Drake)
+        "Texas Tech",    // 3
+        "UNCW",          // 14
+        "Kansas",        // 7
+        "Arkansas",      // 10
+        "St. John's",    // 2
+        "Omaha"          // 15
+      ],
+      "East": [
+        "Duke",          // 1
+        "AMER-MTSM",     // 16 (now with dash)
+        "Miss. St.",     // 8
+        "Baylor",        // 9
+        "Oregon",        // 5
+        "Liberty",       // 12
+        "Arizona",       // 4
+        "Akron",         // 13
+        "BYU",           // 6
+        "VCU",           // 11
+        "Wisconsin",     // 3
+        "Montana",       // 14
+        "Saint Mary's",  // 7
+        "Vanderbilt",    // 10
+        "Alabama",       // 2
+        "Robert Morris"  // 15
+      ],
+      "Midwest": [
+        "Houston",       // 1
+        "SIUE",          // 16
+        "Gonzaga",       // 8
+        "Georgia",       // 9
+        "Clemson",       // 5
+        "McNeese",       // 12
+        "Purdue",        // 4
+        "High Point",    // 13
+        "Illinois",      // 6
+        "TEX-XAV",       // 11 (now with dash)
+        "Kentucky",      // 3
+        "Troy",          // 14
+        "UCLA",          // 7
+        "Utah St.",      // 10
+        "Tennessee",     // 2
+        "Wofford"        // 15
+      ]
+    };
+
+    // Helper function: convert a team name to a logo filename.
+    function formatLogo(team) {
+      return team.toLowerCase().replace(/[\s\.\']/g, "") + ".svg";
+    }
+
+    // Generate a round for a given region.
+    function generateRegionRound(region, round) {
+      var container = document.getElementById(region + '-r' + round);
+      container.innerHTML = '';
+      if (round === 1) {
+        var teams = regions[region];
+        for (var i = 0; i < teams.length; i += 2) {
+          var matchDiv = document.createElement('div');
+          matchDiv.className = 'match';
+          var team1 = teams[i];
+          var team2 = teams[i+1];
+          var matchIndex = i / 2;
+          var slot1 = '<img class="team" src="' + formatLogo(team1) + 
+                      '" alt="' + team1 + 
+                      '" onclick="selectTeam(\'' + region + '\', 1, ' + matchIndex + ', \'' + escapeTeamName(team1) + '\')">';
+          var slot2 = '<img class="team" src="' + formatLogo(team2) + 
+                      '" alt="' + team2 + 
+                      '" onclick="selectTeam(\'' + region + '\', 1, ' + matchIndex + ', \'' + escapeTeamName(team2) + '\')">';
+          matchDiv.innerHTML =
+            '<div class="team-slot" id="' + region + '-r1-m' + matchIndex + '-slot1">' + slot1 + '</div>' +
+            '<div class="team-slot" id="' + region + '-r1-m' + matchIndex + '-slot2">' + slot2 + '</div>';
+          container.appendChild(matchDiv);
+        }
+      } else {
+        var numMatches = Math.pow(2, 4 - round);
+        for (var j = 0; j < numMatches; j++) {
+          var matchDiv = document.createElement('div');
+          matchDiv.className = 'match';
+          matchDiv.id = region + '-r' + round + '-m' + j;
+          matchDiv.innerHTML =
+            '<div class="team-slot" id="' + region + '-r' + round + '-m' + j + '-slot1"></div>' +
+            '<div class="team-slot" id="' + region + '-r' + round + '-m' + j + '-slot2"></div>';
+          container.appendChild(matchDiv);
+        }
+      }
+    }
+
+    // Generate rounds 1-4 for all regions.
+    ["South", "West", "East", "Midwest"].forEach(function(region) {
+      for (var round = 1; round <= 4; round++) {
+        generateRegionRound(region, round);
+      }
+    });
+
+    // Store user selections for each region and round.
+    var selections = {};
+    ["South", "West", "East", "Midwest"].forEach(function(region) {
+      selections[region] = {};
+      for (var round = 1; round <= 4; round++) {
+        var numMatches = (round === 1) ? 8 : Math.pow(2, 4 - round);
+        selections[region][round] = new Array(numMatches).fill(null);
+      }
+    });
+
+    // Object to hold each region's champion.
+    var regionChampions = {};
+
+    // When a team is clicked in a region match.
+    function selectTeam(region, round, matchIndex, team) {
+      selections[region][round][matchIndex] = team;
+      console.log('Selected ' + team + ' in ' + region + ' round ' + round + ' match ' + matchIndex);
+      if (round < 4) {
+        var nextRound = round + 1;
+        var nextMatchIndex = Math.floor(matchIndex / 2);
+        var slot = (matchIndex % 2 === 0) ? 1 : 2;
+        var slotId = region + '-r' + nextRound + '-m' + nextMatchIndex + '-slot' + slot;
+        document.getElementById(slotId).innerHTML =
+          '<img class="team" src="' + formatLogo(team) + '" alt="' + team + 
+          '" onclick="selectTeam(\'' + region + '\', ' + nextRound + ', ' + nextMatchIndex + ', \'' + escapeTeamName(team) + '\')">';
+      } else {
+        setRegionChampion(region, team);
+      }
+    }
+
+    // When a region's final (round 4) is decided, store its champion and update Final Four.
+    function setRegionChampion(region, team) {
+      regionChampions[region] = team;
+      console.log(region + ' champion: ' + team);
+      updateFinalFour();
+    }
+
+    // Update the Final Four boxes based on the region champions.
+    function updateFinalFour() {
+      // Semifinal 1: South vs West
+      var semi1HTML = "";
+      if(regionChampions["South"]){
+          semi1HTML += '<div class="team-slot" id="semi1-slot1">' +
+              '<img class="team" src="' + formatLogo(regionChampions["South"]) + 
+              '" alt="' + regionChampions["South"] + 
+              '" onclick="selectFinalTeam(\'semi1\', 1, \'' + escapeTeamName(regionChampions["South"]) + '\')">' +
+              '</div>';
+      } else {
+          semi1HTML += '<div class="team-slot" id="semi1-slot1"></div>';
+      }
+      if(regionChampions["West"]){
+          semi1HTML += '<div class="team-slot" id="semi1-slot2">' +
+              '<img class="team" src="' + formatLogo(regionChampions["West"]) + 
+              '" alt="' + regionChampions["West"] + 
+              '" onclick="selectFinalTeam(\'semi1\', 2, \'' + escapeTeamName(regionChampions["West"]) + '\')">' +
+              '</div>';
+      } else {
+          semi1HTML += '<div class="team-slot" id="semi1-slot2"></div>';
+      }
+      document.getElementById('semi1').innerHTML = semi1HTML;
+
+      // Semifinal 2: East vs Midwest
+      var semi2HTML = "";
+      if(regionChampions["East"]){
+          semi2HTML += '<div class="team-slot" id="semi2-slot1">' +
+              '<img class="team" src="' + formatLogo(regionChampions["East"]) + 
+              '" alt="' + regionChampions["East"] + 
+              '" onclick="selectFinalTeam(\'semi2\', 1, \'' + escapeTeamName(regionChampions["East"]) + '\')">' +
+              '</div>';
+      } else {
+          semi2HTML += '<div class="team-slot" id="semi2-slot1"></div>';
+      }
+      if(regionChampions["Midwest"]){
+          semi2HTML += '<div class="team-slot" id="semi2-slot2">' +
+              '<img class="team" src="' + formatLogo(regionChampions["Midwest"]) + 
+              '" alt="' + regionChampions["Midwest"] + 
+              '" onclick="selectFinalTeam(\'semi2\', 2, \'' + escapeTeamName(regionChampions["Midwest"]) + '\')">' +
+              '</div>';
+      } else {
+          semi2HTML += '<div class="team-slot" id="semi2-slot2"></div>';
+      }
+      document.getElementById('semi2').innerHTML = semi2HTML;
+    }
+
+    // Object to hold semifinal and championship selections.
+    var finalSelections = {
+      semi1: null,
+      semi2: null,
+      championship: [null, null]
+    };
+
+    // When a semifinal team is clicked.
+    function selectFinalTeam(matchId, slot, team) {
+      finalSelections[matchId] = team;
+      console.log('Final Four selection: ' + team + ' in ' + matchId);
+      if(finalSelections["semi1"] && finalSelections["semi2"]){
+        document.getElementById('champ1').innerHTML =
+          '<img class="team" src="' + formatLogo(finalSelections["semi1"]) + 
+          '" alt="' + finalSelections["semi1"] + 
+          '" onclick="selectChampTeam(1, \'' + escapeTeamName(finalSelections["semi1"]) + '\')">';
+        document.getElementById('champ2').innerHTML =
+          '<img class="team" src="' + formatLogo(finalSelections["semi2"]) + 
+          '" alt="' + finalSelections["semi2"] + 
+          '" onclick="selectChampTeam(2, \'' + escapeTeamName(finalSelections["semi2"]) + '\')">';
+      }
+    }
+
+    // When a championship team is clicked, display the champion's logo.
+    function selectChampTeam(slot, team) {
+      finalSelections.championship[slot - 1] = team;
+      console.log('Championship selection: ' + team + ' in slot ' + slot);
+      if(finalSelections.championship[0] && finalSelections.championship[1]){
+        // Display the champion's logo (only one team will be the final selection)
+        document.getElementById('winner').innerHTML = '<img class="team" src="' + formatLogo(team) + '" alt="' + team + '">';
+      }
+    }
+  </script>
+</body>
+</html>
