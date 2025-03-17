@@ -7,11 +7,12 @@
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
+      font-size: 18px;
     }
     h1, h2, h3 {
       text-align: center;
     }
-    /* Bracket container */
+    /* Bracket container: two regions per row */
     .bracket-container {
       display: flex;
       flex-wrap: wrap;
@@ -19,10 +20,11 @@
     }
     .region {
       border: 1px solid #ccc;
-      margin: 10px;
+      margin: 10px 1%;
       padding: 10px;
-      width: 22%;
-      min-width: 250px;
+      width: 48%;
+      box-sizing: border-box;
+      min-width: 300px;
     }
     /* Each round has extra bottom padding and border for separation */
     .round {
@@ -34,38 +36,39 @@
       border-bottom: none;
     }
     .match {
-      margin: 5px 0;
+      margin: 8px 0;
       text-align: center;
     }
+    /* Increase logo sizes for touch screens */
     .team, .team-slot img {
       cursor: pointer;
       border: 2px solid transparent;
-      width: 50px;
-      height: 50px;
+      width: 80px;
+      height: 80px;
       object-fit: contain;
-      margin: 2px;
+      margin: 4px;
     }
     .team:hover, .team-slot img:hover {
       border: 2px solid blue;
     }
     .team-slot {
       display: inline-block;
-      min-width: 60px;
-      min-height: 60px;
+      min-width: 90px;
+      min-height: 90px;
       vertical-align: middle;
     }
     /* Final Four and Championship styling */
     .finals {
       border: 2px solid #000;
-      padding: 10px;
-      width: 80%;
+      padding: 20px;
+      width: 90%;
       margin: 30px auto;
       text-align: center;
     }
     .finals .match {
       display: flex;
       justify-content: space-around;
-      margin: 10px 0;
+      margin: 20px 0;
     }
   </style>
 </head>
@@ -133,7 +136,7 @@
     var regions = {
       "South": [
         "Auburn",         // 1
-        "ALST-FSU",       // 16 (now with dash)
+        "ALST-FSU",       // 16 (with dash)
         "Louisville",     // 8
         "Creighton",      // 9
         "Michigan",       // 5
@@ -141,7 +144,7 @@
         "Texas A&M",      // 4
         "Yale",           // 13
         "Ole Miss",       // 6
-        "SDSU-UNC",       // 11 (now with dash)
+        "SDSU-UNC",       // 11 (with dash)
         "Iowa St.",       // 3
         "Lipscomb",       // 14
         "Marquette",      // 7
@@ -159,7 +162,7 @@
         "Maryland",      // 4
         "Grand Canyon",  // 13
         "Missouri",      // 6
-        "Drake",         // 11 (Missouri plays Drake)
+        "Drake",         // 11
         "Texas Tech",    // 3
         "UNCW",          // 14
         "Kansas",        // 7
@@ -169,7 +172,7 @@
       ],
       "East": [
         "Duke",          // 1
-        "AMER-MTSM",     // 16 (now with dash)
+        "AMER-MTSM",     // 16 (with dash)
         "Miss. St.",     // 8
         "Baylor",        // 9
         "Oregon",        // 5
@@ -195,7 +198,7 @@
         "Purdue",        // 4
         "High Point",    // 13
         "Illinois",      // 6
-        "TEX-XAV",       // 11 (now with dash)
+        "TEX-XAV",       // 11 (with dash)
         "Kentucky",      // 3
         "Troy",          // 14
         "UCLA",          // 7
@@ -366,7 +369,6 @@
       finalSelections.championship[slot - 1] = team;
       console.log('Championship selection: ' + team + ' in slot ' + slot);
       if(finalSelections.championship[0] && finalSelections.championship[1]){
-        // Display the champion's logo (only one team will be the final selection)
         document.getElementById('winner').innerHTML = '<img class="team" src="' + formatLogo(team) + '" alt="' + team + '">';
       }
     }
